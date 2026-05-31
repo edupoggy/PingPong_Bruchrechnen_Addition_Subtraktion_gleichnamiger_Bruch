@@ -1,0 +1,1253 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Rechen-Pingpong: Gleichnamige Brüche</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;font-family:system-ui,Arial,sans-serif;background:linear-gradient(135deg,#67e8f9,#bbf7d0,#fde68a);color:#0f172a}
+button{font-family:inherit;touch-action:manipulation;cursor:pointer}
+.hidden{display:none!important}
+.start,.end{width:100vw;height:100vh;padding:1.5vh 2vw;display:flex;align-items:center;justify-content:center}
+.card{width:min(100%,1280px);height:94vh;border:8px solid #fff;border-radius:48px;background:rgba(255,255,255,.93);box-shadow:0 24px 70px #0003;padding:clamp(10px,1.6vh,18px);display:flex;flex-direction:column;justify-content:space-between;text-align:center;overflow:hidden}
+.end .card{width:min(90vw,820px);height:auto;padding:42px}
+h1{margin:0;font-size:clamp(32px,5.2vw,64px);color:#0f766e;font-weight:1000;line-height:1;text-shadow:0 4px 0 #fff}
+.subtitle{margin:6px 0 0;color:#1e3a8a;font-size:clamp(16px,2.2vw,26px);font-weight:900}
+.panel{border-radius:28px;padding:clamp(8px,1.2vh,14px);background:#ccfbf1}
+.panel.yellow{background:#fef9c3}
+.panel h2{margin:0 0 6px;font-size:clamp(20px,2.4vw,30px);font-weight:1000;color:#0f766e}
+.panel.yellow h2{color:#2563eb}
+.choiceBtns{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.difficultyBtns{display:flex;justify-content:center;gap:18px;flex-wrap:wrap}
+.timeBtns{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.sel,.mode{border:4px solid #fff;border-radius:22px;background:#fff;color:#2563eb;padding:clamp(7px,1.1vh,12px);font-size:clamp(15px,2vw,24px);font-weight:1000;box-shadow:0 7px 0 #0002}
+.sel.active{background:#14b8a6;border-color:#0f766e;color:#fff}
+.mode.active{background:#facc15;border-color:#2563eb;color:#1e3a8a}
+.info{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.info div{border-radius:24px;padding:clamp(8px,1.2vh,13px);font-size:clamp(15px,1.8vw,21px);font-weight:1000;box-shadow:0 8px 20px #0002}
+.info div:nth-child(1){background:#bfdbfe}.info div:nth-child(2){background:#bbf7d0}.info div:nth-child(3){background:#fde68a}
+.main{width:100%;height:clamp(54px,8.5vh,76px);border:0;border-radius:28px;background:#14b8a6;color:#fff;font-size:clamp(26px,3.5vw,42px);font-weight:1000;box-shadow:0 10px 0 #0f766e}
+.main:active,.sel:active,.mode:active,.ans:active{transform:translateY(3px)}
+
+.game{width:100vw;height:100vh;padding:4vh 2vw;display:flex;align-items:center;justify-content:center}
+.plate{position:relative;width:min(1500px,96vw);height:92vh;display:flex;align-items:center;justify-content:space-between;overflow:hidden;border:12px solid #fff;border-radius:48px;background:linear-gradient(90deg,#22d3ee,#4ade80,#60a5fa);box-shadow:0 25px 70px #0004}
+.side{position:relative;height:100%;width:38vw;min-width:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;transform-origin:center}
+.left{transform:rotate(90deg)}
+.right{transform:rotate(-90deg)}
+.score{position:absolute;top:16px;left:50%;transform:translateX(-50%);min-width:76px;border:4px solid #fff;border-radius:999px;background:#14b8a6;color:#fff;padding:10px 24px;font-size:clamp(30px,4vw,42px);font-weight:1000;box-shadow:0 8px 24px #0003;text-align:center}
+.taskCard{width:min(92%,570px);min-height:330px;border:6px solid #fff;border-radius:40px;padding:22px;text-align:center;background:rgba(255,255,255,.75);box-shadow:0 20px 60px #0003}
+.taskCard.active{background:#e0f2fe;border-color:#fde047}
+.label{font-size:clamp(16px,1.8vw,21px);font-weight:1000;text-transform:uppercase;color:#0f766e}
+.task{margin:18px 0;font-size:clamp(46px,6.5vw,72px);line-height:1.05;color:#1e3a8a;font-weight:1000}
+.answers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ans{height:96px;border:4px solid #fff;border-radius:32px;background:linear-gradient(#fde047,#facc15);color:#1e3a8a;font-size:clamp(28px,4vw,44px);font-weight:1000;box-shadow:0 8px 0 #0002}
+.wait{display:flex;flex-direction:column;align-items:center;justify-content:center;height:230px;gap:14px;font-size:72px}
+.wait span{font-size:clamp(27px,3.2vw,38px);font-weight:1000;color:#67e8f9}
+.fb{margin-top:18px;height:46px;font-size:clamp(22px,2.8vw,30px);font-weight:1000;color:#fff;text-shadow:0 3px 8px #0005;text-align:center}
+.net{position:relative;height:100%;width:20vw;min-width:220px;display:flex;align-items:center;justify-content:center;border-left:10px dashed #ffffffb3;border-right:10px dashed #ffffffb3;background:rgba(16,185,129,.28)}
+.line{position:absolute;left:50%;top:0;width:8px;height:100%;transform:translateX(-50%);background:#ffffffb3}
+.timer{position:absolute;top:26px;z-index:3;border:4px solid #fff;border-radius:999px;background:#f87171;color:#fff;padding:12px 26px;font-size:clamp(34px,4vw,46px);font-weight:1000}
+.netbox{position:relative;z-index:2;text-align:center;display:flex;flex-direction:column;align-items:center;gap:22px}
+.ping{margin-top:120px;border-radius:24px;background:rgba(255,255,255,.82);padding:10px 18px;font-size:clamp(16px,1.8vw,22px);color:#059669;font-weight:1000;box-shadow:0 6px 18px #0002}
+.phase{position:absolute;bottom:26px;z-index:3;border:4px solid #fff;border-radius:999px;background:#ffffffe0;color:#059669;padding:10px 18px;font-size:clamp(16px,1.8vw,24px);font-weight:1000;text-align:center}
+.flyingBall{position:absolute;z-index:8;left:50%;top:50%;width:clamp(42px,5vw,72px);height:clamp(42px,5vw,72px);border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:clamp(30px,4vw,54px);background:#fde047;border:4px solid #fff;box-shadow:0 10px 24px #0004;transform:translate(-50%,-50%);pointer-events:none;opacity:0}
+.flyingBall.flyLeftToRight{animation:flyLTR .55s ease-in-out forwards}
+.flyingBall.flyRightToLeft{animation:flyRTL .55s ease-in-out forwards}
+@keyframes flyLTR{0%{left:18%;top:55%;opacity:1;transform:translate(-50%,-50%) scale(.75) rotate(0deg)}45%{left:50%;top:35%;opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(180deg)}100%{left:82%;top:55%;opacity:0;transform:translate(-50%,-50%) scale(.75) rotate(360deg)}}
+@keyframes flyRTL{0%{left:82%;top:55%;opacity:1;transform:translate(-50%,-50%) scale(.75) rotate(0deg)}45%{left:50%;top:35%;opacity:1;transform:translate(-50%,-50%) scale(1.15) rotate(-180deg)}100%{left:18%;top:55%;opacity:0;transform:translate(-50%,-50%) scale(.75) rotate(-360deg)}}
+.endMsg,.endScore{margin:18px 0;font-size:clamp(24px,3.5vw,40px);color:#1e3a8a;font-weight:1000}
+
+@media(max-height:720px){.card{padding:10px}.panel{padding:8px}.main{height:50px}.taskCard{min-height:290px}.ans{height:82px}.phase{bottom:14px}.fb{font-size:22px}}
+@media(max-width:900px){.choiceBtns,.timeBtns{grid-template-columns:repeat(2,1fr)}.info{grid-template-columns:1fr}}
+
+/* iPad / Tablet quer: Aufgabe optisch ausgewogen, Ergebnisbuttons bleiben sicher im Kasten */
+@media (min-width:951px) and (max-width:1180px) and (max-height:850px) and (orientation: landscape) {
+  .game{padding:1.5vh 1vw}
+  .plate{width:98vw;height:96vh;border-width:8px;border-radius:34px}
+  .side{width:37vw;min-width:0}
+  .net{width:20vw;min-width:150px;border-left-width:7px;border-right-width:7px}
+  .score{top:8px;min-width:58px;border-width:3px;padding:6px 16px;font-size:clamp(24px,3.2vw,34px)}
+  .taskCard{width:82%;min-height:310px;border-width:4px;border-radius:28px;padding:16px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+  .label{font-size:clamp(12px,1.55vw,17px)}
+  .task{margin:8px 0 12px;font-size:clamp(34px,5vw,52px)}
+  .answers{width:100%;gap:7px}
+  .ans{height:56px;border-width:3px;border-radius:20px;font-size:clamp(22px,3.2vw,32px);line-height:1}
+  .wait{height:210px;font-size:52px;gap:8px}
+  .wait span{font-size:clamp(20px,2.6vw,30px)}
+  .fb{margin-top:8px;height:30px;font-size:clamp(17px,2.1vw,23px)}
+  .timer{top:12px;border-width:3px;padding:8px 18px;font-size:clamp(24px,3.2vw,34px)}
+  .ping{margin-top:92px}
+  .phase{bottom:12px;max-width:18vw;font-size:clamp(12px,1.5vw,17px)}
+}
+
+@media (max-width: 950px) and (orientation: landscape) {
+  .start{padding:1vh 1vw}.card{height:98vh;width:99vw;border-width:4px;border-radius:24px;padding:7px}h1{font-size:clamp(23px,5vw,33px)}.subtitle{font-size:clamp(11px,2vw,15px);margin-top:2px}.panel{border-radius:16px;padding:5px}.panel h2{font-size:clamp(14px,2.3vw,18px);margin-bottom:3px}.choiceBtns{grid-template-columns:repeat(3,1fr);gap:4px}.timeBtns{grid-template-columns:repeat(5,1fr);gap:4px}.sel,.mode{border-width:2px;border-radius:10px;padding:4px 2px;font-size:clamp(10px,1.9vw,14px);box-shadow:0 3px 0 #0002}.info{grid-template-columns:repeat(3,1fr);gap:5px}.info div{border-radius:12px;padding:5px 4px;font-size:clamp(10px,1.8vw,13px)}.main{height:38px;border-radius:16px;font-size:clamp(18px,3.2vw,26px);box-shadow:0 5px 0 #0f766e}.game{padding:1vh 1vw}.plate{width:99vw;height:98vh;border-width:5px;border-radius:24px}.side{width:40vw;min-width:0}.net{width:20vw;min-width:90px;border-left-width:5px;border-right-width:5px}.line{width:4px}.score{top:6px;min-width:44px;border-width:2px;padding:4px 12px;font-size:clamp(20px,4vw,28px)}.taskCard{width:92%;min-height:180px;border-width:3px;border-radius:22px;padding:10px}.label{font-size:clamp(10px,2vw,13px)}.task{margin:8px 0;font-size:clamp(28px,6vw,44px)}.answers{gap:6px}.ans{height:48px;border-width:2px;border-radius:16px;font-size:clamp(20px,4vw,30px);box-shadow:0 4px 0 #0002}.wait{height:130px;font-size:40px;gap:6px}.wait span{font-size:clamp(16px,3vw,22px)}.fb{margin-top:8px;height:28px;font-size:clamp(14px,2.8vw,19px)}.timer{top:8px;border-width:2px;padding:5px 12px;font-size:clamp(18px,3.5vw,26px)}.ping{margin-top:72px;border-radius:14px;padding:6px 8px;font-size:clamp(11px,2vw,15px)}.phase{bottom:8px;border-width:2px;border-radius:14px;padding:5px 8px;font-size:clamp(10px,1.8vw,13px);max-width:18vw}.flyingBall{width:clamp(26px,4vw,38px);height:clamp(26px,4vw,38px);font-size:clamp(18px,3vw,28px);border-width:2px}.end .card{height:auto;max-height:96vh;padding:14px}.endMsg,.endScore{margin:8px 0;font-size:clamp(18px,3vw,26px)}
+}
+@media (max-width:700px) and (orientation:portrait){body::before{content:"Bitte iPhone quer drehen 🏓";position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;background:linear-gradient(135deg,#67e8f9,#bbf7d0,#fde68a);color:#1e3a8a;font-size:32px;font-weight:1000}}
+
+.frac{display:inline-grid;grid-template-rows:auto 4px auto;align-items:center;justify-items:center;vertical-align:middle;line-height:1;margin:0 .08em}
+.frac .num,.frac .den{display:block;padding:0 .12em}
+.frac .bar{width:100%;height:4px;background:currentColor;border-radius:999px}
+.mixed{display:inline-flex;align-items:center;gap:.12em;vertical-align:middle}
+.whole{display:inline-block;margin-right:.06em}
+.opSymbol{display:inline-block;margin:0 .22em}
+.task .frac .bar{height:6px}
+.ans .frac .bar{height:3px}
+.ans{height:120px;font-size:clamp(30px,4vw,48px);padding:8px}
+.ans .mixed{gap:.08em}
+.ans .frac{grid-template-rows:auto 3px auto}
+
+
+/* Optimierung für iPad 6. Generation: 9,7 Zoll, 1024 × 768 im Querformat */
+@media (min-width:960px) and (max-width:1080px) and (min-height:700px) and (max-height:820px) and (orientation: landscape) {
+  .start{padding:1vh 1vw}
+  .card{
+    width:98vw;
+    height:97vh;
+    border-width:6px;
+    border-radius:34px;
+    padding:10px;
+  }
+  h1{font-size:clamp(34px,5vw,48px)}
+  .subtitle{
+    font-size:clamp(17px,2vw,22px);
+    margin-top:4px;
+  }
+  .panel{
+    border-radius:22px;
+    padding:8px;
+  }
+  .panel h2{
+    font-size:clamp(20px,2.4vw,26px);
+    margin-bottom:5px;
+  }
+  .choiceBtns,.timeBtns{
+    gap:6px;
+  }
+  .difficultyBtns{
+    gap:10px;
+  }
+  .sel,.mode{
+    border-width:3px;
+    border-radius:17px;
+    padding:8px 7px;
+    font-size:clamp(16px,2vw,21px);
+    box-shadow:0 5px 0 #0002;
+  }
+  .difficultyBtns .sel{
+    min-width:310px!important;
+  }
+  .info{
+    gap:7px;
+  }
+  .info div{
+    border-radius:18px;
+    padding:8px;
+    font-size:clamp(15px,1.8vw,19px);
+  }
+  .main{
+    height:58px;
+    border-radius:22px;
+    font-size:clamp(28px,3.4vw,36px);
+    box-shadow:0 7px 0 #0f766e;
+  }
+
+  .game{padding:1vh 1vw}
+  .plate{
+    width:98vw;
+    height:97vh;
+    border-width:8px;
+    border-radius:34px;
+  }
+  .side{
+    width:39vw;
+    min-width:0;
+  }
+  .net{
+    width:18vw;
+    min-width:150px;
+    border-left-width:7px;
+    border-right-width:7px;
+  }
+  .score{
+    top:10px;
+    min-width:62px;
+    border-width:3px;
+    padding:7px 17px;
+    font-size:clamp(28px,3.6vw,36px);
+  }
+  .taskCard{
+    width:88%;
+    min-height:370px;
+    border-width:5px;
+    border-radius:32px;
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .label{
+    font-size:clamp(15px,1.7vw,18px);
+  }
+  .task{
+    margin:14px 0 18px;
+    font-size:clamp(50px,6.5vw,68px);
+    line-height:1.05;
+  }
+  .task .frac .bar{
+    height:5px;
+  }
+  .answers{
+    gap:10px;
+  }
+  .ans{
+    height:112px;
+    min-width:0;
+    border-width:4px;
+    border-radius:26px;
+    padding:8px 4px;
+    font-size:clamp(32px,4vw,44px);
+    line-height:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .ans .frac{
+    grid-template-rows:auto 3px auto;
+    margin:0 .04em;
+  }
+  .ans .frac .bar{
+    height:3px;
+  }
+  .ans .mixed{
+    gap:.08em;
+  }
+  .ans .whole{
+    margin-right:.02em;
+  }
+  .wait{
+    height:250px;
+    font-size:58px;
+    gap:10px;
+  }
+  .wait span{
+    font-size:clamp(24px,2.8vw,30px);
+  }
+  .fb{
+    margin-top:10px;
+    height:34px;
+    font-size:clamp(19px,2.3vw,24px);
+  }
+  .timer{
+    top:14px;
+    border-width:3px;
+    padding:8px 18px;
+    font-size:clamp(28px,3.5vw,36px);
+  }
+  .ping{
+    margin-top:90px;
+    border-radius:18px;
+    padding:8px 10px;
+    font-size:clamp(14px,1.7vw,18px);
+  }
+  .phase{
+    bottom:14px;
+    max-width:16vw;
+    border-width:3px;
+    padding:7px 9px;
+    font-size:clamp(12px,1.5vw,16px);
+  }
+  .flyingBall{
+    width:54px;
+    height:54px;
+    font-size:38px;
+    border-width:3px;
+  }
+}
+
+/* iPad 6. Generation Hochformat: bitte drehen, damit die Spielfläche passt */
+@media (min-width:700px) and (max-width:850px) and (min-height:960px) and (max-height:1080px) and (orientation:portrait){
+  body::before{
+    content:"Bitte iPad quer drehen 🏓";
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:32px;
+    background:linear-gradient(135deg,#67e8f9,#bbf7d0,#fde68a);
+    color:#1e3a8a;
+    font-size:44px;
+    font-weight:1000;
+  }
+}
+
+
+.answers{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+  width:100%;
+  align-items:stretch;
+}
+
+.ans{
+  height:120px !important;
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:12px 8px !important;
+  overflow:hidden;
+}
+
+.taskCard{
+  justify-content:flex-start !important;
+}
+
+.task{
+  margin-bottom:24px !important;
+}
+
+
+/* Finale iPad-6-Anpassung: alles bleibt innerhalb der Karten sichtbar */
+.fb{
+  display:none !important;
+}
+
+.cardFeedback{
+  min-height:30px;
+  margin-top:8px;
+  padding:2px 6px;
+  font-size:clamp(16px,2vw,22px);
+  font-weight:1000;
+  color:#0f766e;
+  text-align:center;
+  line-height:1.1;
+  text-shadow:none;
+}
+
+@media (min-width:960px) and (max-width:1080px) and (min-height:700px) and (max-height:820px) and (orientation: landscape) {
+  .side{
+    width:38vw !important;
+    min-width:0 !important;
+    justify-content:center !important;
+  }
+
+  .taskCard{
+    width:78% !important;
+    min-height:300px !important;
+    max-height:340px !important;
+    padding:14px !important;
+    border-width:5px !important;
+    border-radius:30px !important;
+    display:flex !important;
+    flex-direction:column !important;
+    justify-content:center !important;
+    overflow:hidden !important;
+  }
+
+  .label{
+    font-size:clamp(13px,1.55vw,16px) !important;
+    line-height:1.1 !important;
+    margin-bottom:4px !important;
+    white-space:normal !important;
+  }
+
+  .task{
+    margin:6px 0 12px !important;
+    font-size:clamp(38px,5.2vw,52px) !important;
+    line-height:1 !important;
+  }
+
+  .task .frac{
+    grid-template-rows:auto 4px auto !important;
+    margin:0 .06em !important;
+  }
+
+  .task .frac .bar{
+    height:4px !important;
+  }
+
+  .answers{
+    display:grid !important;
+    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+    gap:8px !important;
+    width:100% !important;
+    align-items:stretch !important;
+  }
+
+  .ans{
+    height:78px !important;
+    min-width:0 !important;
+    width:100% !important;
+    border-width:3px !important;
+    border-radius:20px !important;
+    padding:5px 3px !important;
+    font-size:clamp(28px,3.5vw,38px) !important;
+    line-height:1 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    overflow:hidden !important;
+  }
+
+  .ans .frac{
+    grid-template-rows:auto 3px auto !important;
+    margin:0 .03em !important;
+  }
+
+  .ans .frac .bar{
+    height:3px !important;
+  }
+
+  .ans .mixed{
+    gap:.04em !important;
+  }
+
+  .ans .whole{
+    margin-right:.02em !important;
+  }
+
+  .wait{
+    height:180px !important;
+    font-size:48px !important;
+    gap:6px !important;
+  }
+
+  .wait span{
+    font-size:clamp(22px,2.6vw,28px) !important;
+    line-height:1.05 !important;
+  }
+
+  .cardFeedback{
+    min-height:28px !important;
+    margin-top:7px !important;
+    font-size:clamp(17px,2vw,22px) !important;
+  }
+
+  .score{
+    top:8px !important;
+  }
+}
+
+/* Auch für kleinere Querformat-Ansichten etwas kompakter */
+@media (max-width:950px) and (orientation: landscape){
+  .taskCard{
+    width:86% !important;
+    min-height:170px !important;
+    padding:8px !important;
+    display:flex !important;
+    flex-direction:column !important;
+    justify-content:center !important;
+  }
+
+  .task{
+    margin:4px 0 8px !important;
+    font-size:clamp(25px,5vw,38px) !important;
+  }
+
+  .answers{
+    gap:5px !important;
+  }
+
+  .ans{
+    height:46px !important;
+    padding:3px !important;
+    font-size:clamp(19px,3.6vw,27px) !important;
+  }
+
+  .cardFeedback{
+    min-height:20px !important;
+    margin-top:4px !important;
+    font-size:clamp(13px,2.4vw,17px) !important;
+  }
+
+  .wait{
+    height:105px !important;
+  }
+}
+
+
+/* Korrektur: Brüche in den gelben Antwortfeldern werden nicht mehr abgeschnitten */
+@media (min-width:960px) and (max-width:1080px) and (min-height:700px) and (max-height:820px) and (orientation: landscape) {
+  .ans{
+    height:96px !important;
+    padding:6px 3px !important;
+    font-size:clamp(23px,3vw,32px) !important;
+    line-height:1 !important;
+    overflow:visible !important;
+  }
+
+  .ans .frac{
+    grid-template-rows:auto 3px auto !important;
+    line-height:.88 !important;
+    transform:scale(.86);
+    transform-origin:center;
+    margin:0 -.02em !important;
+  }
+
+  .ans .frac .num,
+  .ans .frac .den{
+    padding:0 .08em !important;
+  }
+
+  .ans .mixed{
+    transform:scale(.86);
+    transform-origin:center;
+    gap:.02em !important;
+  }
+
+  .answers{
+    gap:7px !important;
+  }
+
+  .taskCard{
+    min-height:315px !important;
+    max-height:350px !important;
+  }
+}
+
+@media (max-width:950px) and (orientation: landscape){
+  .ans{
+    height:58px !important;
+    font-size:clamp(16px,3vw,23px) !important;
+    overflow:visible !important;
+  }
+
+  .ans .frac{
+    transform:scale(.82);
+    transform-origin:center;
+    line-height:.86 !important;
+  }
+
+  .ans .mixed{
+    transform:scale(.82);
+    transform-origin:center;
+  }
+}
+
+
+/* Startseite nach Entfernen der Schwierigkeitsauswahl luftiger */
+.start .card{
+  justify-content:space-around;
+}
+
+
+.wordTask{display:block;font-size:.72em;line-height:1.15;padding:2px 0}
+.blank{display:inline-flex;align-items:center;justify-content:center;min-width:.9em;height:.9em;margin:0 .05em;border-radius:.12em;background:#cbd5e1;color:#cbd5e1;box-shadow:inset 0 0 0 3px #94a3b8;vertical-align:middle}
+@media (min-width:960px) and (max-width:1080px) and (min-height:700px) and (max-height:820px) and (orientation: landscape){
+  .wordTask{font-size:.68em!important;line-height:1.12!important}
+  .blank{min-width:.85em!important;height:.85em!important}
+  .start .card{height:98vh!important;padding:8px!important;justify-content:space-between!important}
+  .start .panel{padding:6px!important}
+  .start .panel h2{font-size:clamp(18px,2.2vw,23px)!important;margin-bottom:4px!important}
+  .start .sel,.start .mode{padding:6px 5px!important;font-size:clamp(14px,1.8vw,19px)!important}
+  .start .main{height:52px!important;font-size:clamp(25px,3vw,32px)!important}
+}
+
+
+/* Startseite: weniger Auswahl, mehr Luft */
+.start .card{
+  justify-content:space-around !important;
+}
+
+@media (min-width:960px) and (max-width:1080px) and (min-height:700px) and (max-height:820px) and (orientation: landscape){
+  .start .card{
+    justify-content:space-around !important;
+  }
+}
+
+
+/* Platzhalteraufgaben immer in einer Zeile */
+.placeholderTask{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.18em;
+  white-space:nowrap;
+  width:100%;
+}
+
+.placeholderTask .frac{
+  margin:0 .02em;
+}
+
+@media (min-width:960px) and (max-width:1080px){
+  .placeholderTask{
+    transform:scale(.92);
+    transform-origin:center;
+  }
+}
+
+
+/* Finale Darstellung Platzhalteraufgaben: kompakt, zentriert, nicht gequetscht */
+.placeholderTask{
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:.08em !important;
+  width:100% !important;
+  white-space:normal !important;
+  transform:none !important;
+}
+
+.placeholderLine{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:.14em !important;
+  width:100% !important;
+  line-height:1 !important;
+  white-space:nowrap !important;
+}
+
+.placeholderEquals{
+  margin-top:.02em !important;
+}
+
+.placeholderTask .frac{
+  margin:0 .03em !important;
+}
+
+.placeholderTask .opSymbol{
+  margin:0 .10em !important;
+}
+
+.placeholderTask .blank{
+  min-width:.75em !important;
+  height:.75em !important;
+  box-shadow:inset 0 0 0 2px #94a3b8 !important;
+}
+
+/* Platzhalteraufgaben bekommen innerhalb der Aufgabenkarte etwas kleinere, aber gut lesbare Brüche */
+@media (min-width:960px) and (max-width:1080px) and (min-height:700px) and (max-height:820px) and (orientation: landscape){
+  .task:has(.placeholderTask){
+    font-size:clamp(34px,4.8vw,48px) !important;
+    margin:4px 0 10px !important;
+  }
+
+  .placeholderTask{
+    gap:.04em !important;
+  }
+
+  .placeholderLine{
+    gap:.10em !important;
+  }
+
+  .taskCard:has(.placeholderTask){
+    min-height:315px !important;
+    max-height:350px !important;
+  }
+}
+
+@media (max-width:950px) and (orientation: landscape){
+  .task:has(.placeholderTask){
+    font-size:clamp(24px,4.6vw,34px) !important;
+  }
+
+  .placeholderLine{
+    gap:.08em !important;
+  }
+}
+
+
+/* Platzhalteraufgaben wieder einzeilig */
+.placeholderTask{
+  display:flex !important;
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:.12em !important;
+  width:100% !important;
+  white-space:nowrap !important;
+}
+
+.placeholderLine,
+.placeholderEquals{
+  display:contents !important;
+}
+
+@media (min-width:960px) and (max-width:1080px){
+  .task:has(.placeholderTask){
+    font-size:clamp(28px,4vw,40px) !important;
+  }
+
+  .placeholderTask{
+    transform:scale(.88);
+    transform-origin:center;
+  }
+}
+
+</style>
+</head>
+<body>
+<section id="start" class="start">
+<div class="card">
+<div>
+<h1>🏓 Bruch-Pingpong 🏓</h1>
+<p class="subtitle">Übt das Addieren und Subtrahieren gleichnamiger Brüche – wie bei einer echten Tischtennispartie!</p>
+</div>
+
+<div class="panel">
+<h2>Welche Rechenart?</h2>
+<div class="choiceBtns">
+<button class="sel active" data-op="mixed">Plus & Minus</button>
+<button class="sel" data-op="add">Addition</button>
+<button class="sel" data-op="sub">Subtraktion</button>
+</div>
+</div>
+
+
+
+
+<div class="panel yellow">
+<h2>Zeitmodus</h2>
+<div class="timeBtns">
+<button class="mode active" data-time="0">Ohne Zeitlimit</button>
+<button class="mode" data-time="5">5 Sekunden</button>
+<button class="mode" data-time="10">10 Sekunden</button>
+<button class="mode" data-time="15">15 Sekunden</button>
+<button class="mode" data-time="20">20 Sekunden</button>
+</div>
+</div>
+
+<div class="info">
+<div>👦 Spieler links</div>
+<div>➕➖ Verschiedene Bruchaufgaben</div>
+<div>👧 Spieler rechts</div>
+</div>
+
+<button id="startBtn" class="main">SPIEL STARTEN</button>
+</div>
+</section>
+
+<section id="game" class="game hidden">
+<main class="plate">
+<div id="flyingBall" class="flyingBall">🏓</div>
+
+<div class="side left">
+<div id="scoreL" class="score">0</div>
+<div id="cardL" class="taskCard"></div>
+<div id="fbL" class="fb"></div>
+</div>
+
+<div class="net">
+<div id="timer" class="timer hidden">⏰ 5</div>
+<div class="line"></div>
+<div class="netbox"><div id="netText" class="ping">🏓 Ballwechsel</div></div>
+<div id="phase" class="phase hidden"></div>
+</div>
+
+<div class="side right">
+<div id="scoreR" class="score">0</div>
+<div id="cardR" class="taskCard"></div>
+<div id="fbR" class="fb"></div>
+</div>
+</main>
+</section>
+
+<section id="end" class="end hidden">
+<div class="card">
+<div style="font-size:90px">🏆</div>
+<h1 id="winnerText">Spieler gewinnt!</h1>
+<div id="endMsg" class="endMsg"></div>
+<div id="endScore" class="endScore"></div>
+<button id="newRound" class="main">NEUE RUNDE</button>
+</div>
+</section>
+
+<script>
+const WIN = 10;
+let operationMode = "mixed";
+let taskType = "fraction";
+let timeLimit = 0;
+let timeLeft = 0;
+let timerInt = null;
+
+let active = "left";
+let task = null;
+let score = {left:0, right:0};
+let turns = {left:0, right:0};
+let feedback = {left:"", right:""};
+let resolved = false;
+let phase = "normal";
+
+const $ = id => document.getElementById(id);
+
+function randomInt(min,max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
+function shuffle(array){ return [...array].sort(() => Math.random() - 0.5); }
+
+function gcd(a,b){
+  a = Math.abs(a);
+  b = Math.abs(b);
+  while(b){
+    const temp = b;
+    b = a % b;
+    a = temp;
+  }
+  return a || 1;
+}
+
+function reduceFraction(numerator, denominator){
+  const divisor = gcd(numerator, denominator);
+  return {
+    n: numerator / divisor,
+    d: denominator / divisor
+  };
+}
+
+function fractionHTML(numerator, denominator){
+  return `<span class="frac"><span class="num">${numerator}</span><span class="bar"></span><span class="den">${denominator}</span></span>`;
+}
+
+function valueHTML(value){
+  const reduced = reduceFraction(value.n, value.d);
+
+  if(reduced.n === 0){
+    return `<span class="whole">0</span>`;
+  }
+
+  if(reduced.d === 1){
+    return `<span class="whole">${reduced.n}</span>`;
+  }
+
+  return fractionHTML(reduced.n, reduced.d);
+}
+
+function valueKey(value){
+  const reduced = reduceFraction(value.n, value.d);
+  return `${reduced.n}/${reduced.d}`;
+}
+
+function taskHTML(a, denominator, op, b){
+  const symbol = op === "add" ? "+" : "−";
+  return `${fractionHTML(a, denominator)} <span class="opSymbol">${symbol}</span> ${fractionHTML(b, denominator)}`;
+}
+
+function denominatorWord(denominator){
+  const words = {
+    2:"Halbe",
+    3:"Drittel",
+    4:"Viertel",
+    5:"Fünftel",
+    6:"Sechstel",
+    7:"Siebtel",
+    8:"Achtel",
+    9:"Neuntel",
+    10:"Zehntel",
+    11:"Elftel",
+    12:"Zwölftel"
+  };
+  return words[denominator] || `${denominator}tel`;
+}
+
+function wordTaskHTML(a, denominator, op, b){
+  const symbol = op === "add" ? "+" : "−";
+  const word = denominatorWord(denominator);
+  return `<span class="wordTask">${a} ${word} ${symbol} ${b} ${word}</span>`;
+}
+
+function placeholderTaskHTML(a, denominator, op, b, result, missing){
+  const symbol = op === "add" ? "+" : "−";
+  const blank = '<span class="blank">0</span>';
+
+  const first = missing === "a" ? fractionHTML(blank, denominator) : fractionHTML(a, denominator);
+  const second = missing === "b" ? fractionHTML(blank, denominator) : fractionHTML(b, denominator);
+  const answer = missing === "result" ? fractionHTML(blank, denominator) : fractionHTML(result, denominator);
+
+  return `<span class="placeholderTask">${first} <span class="opSymbol">${symbol}</span> ${second} <span class="opSymbol">=</span> ${answer}</span>`;
+}
+
+function makeFractionTask(type){
+  const denominator = taskType === "placeholder" ? randomInt(2, 9) : randomInt(2, 12);
+  let a, b, result, questionHTML, correctValue;
+
+  if(type === "add"){
+    if(taskType === "placeholder"){
+      a = randomInt(2, Math.min(12, denominator + 5));
+      b = randomInt(2, Math.min(12, denominator + 5));
+    } else {
+      a = randomInt(1, denominator + 4);
+      b = randomInt(1, denominator + 4);
+    }
+    result = a + b;
+
+    if(taskType === "word"){
+      questionHTML = wordTaskHTML(a, denominator, "add", b);
+      correctValue = {n: result, d: denominator, kind:"fraction"};
+    } else if(taskType === "placeholder"){
+      const missing = ["a", "b", "result"][randomInt(0,2)];
+      questionHTML = placeholderTaskHTML(a, denominator, "add", b, result, missing);
+      const missingNumerator = missing === "a" ? a : missing === "b" ? b : result;
+      correctValue = {n: missingNumerator, d: denominator, kind:"number"};
+    } else {
+      questionHTML = taskHTML(a, denominator, "add", b);
+      correctValue = {n: result, d: denominator, kind:"fraction"};
+    }
+
+    return {
+      q: questionHTML,
+      c: correctValue.kind === "number" ? String(correctValue.n) : valueKey(correctValue),
+      answer: correctValue
+    };
+  }
+
+  if(taskType === "placeholder"){
+    a = randomInt(4, Math.min(15, denominator + 8));
+    b = randomInt(2, a - 2);
+  } else {
+    a = randomInt(2, denominator + 6);
+    b = randomInt(1, a - 1);
+  }
+  result = a - b;
+
+  if(taskType === "word"){
+    questionHTML = wordTaskHTML(a, denominator, "sub", b);
+    correctValue = {n: result, d: denominator, kind:"fraction"};
+  } else if(taskType === "placeholder"){
+    const missing = ["a", "b", "result"][randomInt(0,2)];
+    questionHTML = placeholderTaskHTML(a, denominator, "sub", b, result, missing);
+    const missingNumerator = missing === "a" ? a : missing === "b" ? b : result;
+    correctValue = {n: missingNumerator, d: denominator, kind:"number"};
+  } else {
+    questionHTML = taskHTML(a, denominator, "sub", b);
+    correctValue = {n: result, d: denominator, kind:"fraction"};
+  }
+
+  return {
+    q: questionHTML,
+    c: correctValue.kind === "number" ? String(correctValue.n) : valueKey(correctValue),
+    answer: correctValue
+  };
+}
+
+function makeTask(){
+  const types = ["fraction", "word", "placeholder"];
+  taskType = types[randomInt(0, types.length - 1)];
+
+  let op = operationMode;
+  if(op === "mixed") op = Math.random() > 0.5 ? "add" : "sub";
+
+  const base = makeFractionTask(op);
+  const denominator = base.answer.d;
+  const correctNumerator = base.answer.n;
+  const isNumberAnswer = base.answer.kind === "number";
+
+  const wrong = new Map();
+  let guard = 0;
+
+  while(wrong.size < 2 && guard < 100){
+    guard++;
+    const offset = randomInt(-4, 4);
+    const numerator = correctNumerator + offset;
+
+    if(numerator > 0 && numerator !== correctNumerator){
+      if(isNumberAnswer){
+        const key = String(numerator);
+        if(key !== base.c){
+          wrong.set(key, {key, html: `<span class="whole">${numerator}</span>`});
+        }
+      } else {
+        const key = valueKey({n:numerator, d:denominator});
+        if(key !== base.c){
+          wrong.set(key, {
+            key,
+            html: valueHTML({n:numerator, d:denominator})
+          });
+        }
+      }
+    }
+  }
+
+  while(wrong.size < 2){
+    const numerator = randomInt(1, Math.max(denominator + 6, correctNumerator + 5));
+    if(numerator !== correctNumerator){
+      if(isNumberAnswer){
+        const key = String(numerator);
+        if(key !== base.c){
+          wrong.set(key, {key, html: `<span class="whole">${numerator}</span>`});
+        }
+      } else {
+        const key = valueKey({n:numerator, d:denominator});
+        if(key !== base.c){
+          wrong.set(key, {
+            key,
+            html: valueHTML({n:numerator, d:denominator})
+          });
+        }
+      }
+    }
+  }
+
+  const correctHTML = isNumberAnswer
+    ? `<span class="whole">${base.answer.n}</span>`
+    : valueHTML(base.answer);
+
+  const answers = shuffle([
+    {key: base.c, html: correctHTML},
+    ...Array.from(wrong.values())
+  ]);
+
+  return {
+    q: base.q,
+    c: base.c,
+    ans: answers
+  };
+}
+
+function show(screen){
+  $("start").classList.toggle("hidden", screen !== "start");
+  $("game").classList.toggle("hidden", screen !== "game");
+  $("end").classList.toggle("hidden", screen !== "end");
+}
+
+function renderOptions(){
+  document.querySelectorAll("[data-op]").forEach(button => {
+    button.classList.toggle("active", button.dataset.op === operationMode);
+  });
+}
+
+function renderTimeButtons(){
+  document.querySelectorAll(".mode").forEach(button => {
+    button.classList.toggle("active", Number(button.dataset.time) === timeLimit);
+  });
+}
+
+function renderCard(side){
+  const isActive = active === side;
+  const card = side === "left" ? $("cardL") : $("cardR");
+  card.className = "taskCard" + (isActive ? " active" : "");
+
+  if(isActive){
+    card.innerHTML = `
+      <div class="label">Tippe die richtige Antwort!</div>
+      <div class="task">${task.q}</div>
+      <div class="answers">
+        ${task.ans.map(answer => `<button class="ans" data-answer="${answer.key}">${answer.html}</button>`).join("")}
+      </div>
+      <div class="cardFeedback">${feedback[side] || ""}</div>
+    `;
+    card.querySelectorAll(".ans").forEach(button => {
+      button.onclick = () => answer(button.dataset.answer);
+    });
+  } else {
+    card.innerHTML = `
+      <div class="label">Warte auf den Ball</div>
+      <div class="wait"><div>🏓</div><span>Bereit machen!</span></div>
+      <div class="cardFeedback">${feedback[side] || ""}</div>
+    `;
+  }
+}
+
+function renderPhase(){
+  if(phase === "sudden"){
+    $("netText").textContent = "Fehler entscheidet!";
+    $("phase").textContent = "Gleichstand: Wer jetzt einen Fehler macht, verliert.";
+    $("phase").classList.remove("hidden");
+  } else if(phase === "final"){
+    $("netText").textContent = "Letzter Ball!";
+    $("phase").textContent = "Der Gegenspieler bekommt noch einen fairen letzten Ball.";
+    $("phase").classList.remove("hidden");
+  } else {
+    $("netText").textContent = "🏓 Ballwechsel";
+    $("phase").classList.add("hidden");
+  }
+}
+
+function render(){
+  $("scoreL").textContent = score.left;
+  $("scoreR").textContent = score.right;
+  $("fbL").textContent = "";
+  $("fbR").textContent = "";
+  renderCard("left");
+  renderCard("right");
+  $("timer").classList.toggle("hidden", timeLimit === 0);
+  $("timer").textContent = `⏰ ${timeLeft}`;
+  renderPhase();
+}
+
+function startTimer(){
+  clearInterval(timerInt);
+  if(timeLimit === 0){
+    timeLeft = 0;
+    render();
+    return;
+  }
+  timeLeft = timeLimit;
+  render();
+  timerInt = setInterval(() => {
+    if(resolved) return;
+    timeLeft -= 1;
+    render();
+    if(timeLeft <= 0) resolve(false, true);
+  }, 1000);
+}
+
+function startGame(){
+  score = {left:0, right:0};
+  turns = {left:0, right:0};
+  feedback = {left:"Los geht's!", right:""};
+  phase = "normal";
+  resolved = false;
+  active = Math.random() > 0.5 ? "left" : "right";
+  task = makeTask();
+  timeLeft = timeLimit;
+  show("game");
+  render();
+  startTimer();
+}
+
+function toStart(){
+  clearInterval(timerInt);
+  feedback = {left:"", right:""};
+  phase = "normal";
+  resolved = false;
+  timeLeft = timeLimit;
+  show("start");
+  renderOptions();
+  renderTimeButtons();
+}
+
+function finish(winner, message){
+  clearInterval(timerInt);
+  $("winnerText").textContent = `Spieler ${winner === "left" ? "links" : "rechts"} gewinnt!`;
+  $("endMsg").textContent = message;
+  $("endScore").textContent = `Links ${score.left} : ${score.right} Rechts`;
+  show("end");
+}
+
+function checkEnd(updatedScore, updatedTurns, player, other, wasCorrect){
+  const equalTurns = updatedTurns.left === updatedTurns.right;
+  const reachedTarget = updatedScore.left >= WIN || updatedScore.right >= WIN;
+
+  if(phase === "sudden"){
+    if(!wasCorrect){
+      finish(other, `Spieler ${other === "left" ? "links" : "rechts"} gewinnt, weil der Gegner einen Fehler gemacht hat!`);
+      return true;
+    }
+    feedback[player] = "🏓 Richtig! Weiter geht's!";
+    feedback[other] = "Fehler entscheidet!";
+    return false;
+  }
+
+  if(reachedTarget && equalTurns){
+    if(updatedScore.left > updatedScore.right){
+      finish("left", "Klarer Sieg für Spieler links! 🎉");
+      return true;
+    }
+    if(updatedScore.right > updatedScore.left){
+      finish("right", "Klarer Sieg für Spieler rechts! 🎉");
+      return true;
+    }
+    phase = "sudden";
+    feedback = {
+      left: "Gleichstand! Fehler entscheidet!",
+      right: "Gleichstand! Fehler entscheidet!"
+    };
+    return false;
+  }
+
+  if(reachedTarget && !equalTurns){
+    phase = "final";
+    feedback[player] = "10 Punkte! Der Gegner bekommt noch einen letzten Ball.";
+    feedback[other] = "Letzter Ball zum Ausgleich!";
+    return false;
+  }
+
+  return false;
+}
+
+function animateBall(from,to){
+  const ball = $("flyingBall");
+  ball.className = "flyingBall";
+  void ball.offsetWidth;
+  if(from === "left" && to === "right") ball.classList.add("flyLeftToRight");
+  if(from === "right" && to === "left") ball.classList.add("flyRightToLeft");
+}
+
+function nextTurn(other, delay){
+  animateBall(active, other);
+  setTimeout(() => {
+    active = other;
+    task = makeTask();
+    resolved = false;
+    render();
+    startTimer();
+  }, delay);
+}
+
+function resolve(correct, timeout = false){
+  if(resolved) return;
+  resolved = true;
+  clearInterval(timerInt);
+
+  const player = active;
+  const other = player === "left" ? "right" : "left";
+  const updatedTurns = {...turns, [player]: turns[player] + 1};
+  const updatedScore = {...score};
+
+  if(phase === "sudden"){
+    if(!correct) updatedScore[other] += 1;
+  } else if(correct){
+    updatedScore[player] += 1;
+  } else {
+    updatedScore[other] += 1;
+  }
+
+  turns = updatedTurns;
+  score = updatedScore;
+
+  if(phase !== "sudden"){
+    if(correct){
+      feedback[player] = "🏓 Super!";
+      feedback[other] = "Der Ball kommt!";
+    } else {
+      feedback[player] = timeout ? "⏰ Zu langsam!" : `❌ ${task.c} wäre richtig!`;
+      feedback[other] = "🎉 Punkt für dich!";
+    }
+  }
+
+  render();
+  const ended = checkEnd(updatedScore, updatedTurns, player, other, correct);
+  render();
+
+  if(ended) return;
+  nextTurn(other, correct ? 450 : 750);
+}
+
+function answer(value){
+  resolve(value === task.c, false);
+}
+
+document.querySelectorAll(".mode").forEach(button => {
+  button.onclick = () => {
+    timeLimit = Number(button.dataset.time);
+    renderTimeButtons();
+  };
+});
+
+
+
+document.querySelectorAll("[data-op]").forEach(button => {
+  button.onclick = () => {
+    operationMode = button.dataset.op;
+    renderOptions();
+  };
+});
+
+
+
+$("startBtn").onclick = startGame;
+$("newRound").onclick = toStart;
+
+renderOptions();
+renderTimeButtons();
+show("start");
+</script>
+</body>
+</html>
