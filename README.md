@@ -1,0 +1,2 @@
+# PingPong_Bruchrechnen_Addition_Subtraktion_gleichnamiger_Bruch
+digitales Ping Pong Spiel zum Üben des Addieren und Subtrahieren gleichnamiger Brüche
